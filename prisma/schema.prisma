@@ -1,0 +1,78 @@
+// Prisma schema – https://pris.ly/d/prisma-schema
+// The datasource URL lives in prisma.config.ts (Prisma 7).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// A family member
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  wishlists Wishlist[]
+  sessions  Session[]
+
+  // 4-digit PIN for signing in on any device (scrypt hash). Whoever picks a
+  // profile first sets it; without a PIN the profile is still free.
+  pinHash           String?
+  pinSetAt          DateTime?
+  // The admin assigned the PIN: the person has to choose their own before
+  // they see anything, so the admin never knows the PIN in use.
+  pinMustChange     Boolean   @default(false)
+  pinFailedAttempts Int       @default(0)
+  pinLockedUntil    DateTime?
+  // "PIN vergessen?" – listed for the admin until a new PIN is set.
+  pinResetRequestedAt DateTime?
+
+  // Secret Santa: the person this member has drawn. Secret – only shown to
+  // the member themselves. Unique, so everybody can be drawn only once.
+  drawnUserId Int?      @unique
+  drawnUser   User?     @relation("Draw", fields: [drawnUserId], references: [id], onDelete: SetNull)
+  drawnBy     User?     @relation("Draw")
+  drawnAt     DateTime?
+}
+
+// A signed-in device. It keeps a random token in a cookie; only its SHA-256
+// hash is stored.
+model Session {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+}
+
+// A wishlist belongs to one family member
+model Wishlist {
+  id          Int            @id @default(autoincrement())
+  title       String
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     Int
+  items       WishlistItem[]
+
+  // Wichtel-only lists are visible to the owner and to whoever has drawn the
+  // owner. Otherwise the whole family can see the list.
+  wichtelOnly Boolean @default(true)
+}
+
+// A single wish on a wishlist
+model WishlistItem {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  url         String? // Link to the product online
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  wishlist    Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  wishlistId  Int
+}

@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens – warm "winter paper" palette with a matching dark mode
+   ------------------------------------------------------------------------- */
+
+:root {
+  --paper: #f8f4ec;
+  --surface: #fffdf9;
+  --surface-2: #f2ece1;
+  --line: #e5dccc;
+  --ink: #1c2620;
+  --muted: #646d63;
+
+  --pine: #1f5a43;
+  --pine-strong: #164534;
+  --pine-soft: #e2eee7;
+  --on-pine: #ffffff;
+
+  --berry: #ab3247;
+  --berry-soft: #f7e3e5;
+  --on-berry: #ffffff;
+
+  --gold: #a87622;
+  --gold-soft: #f5ebd5;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1512;
+    --surface: #151f1a;
+    --surface-2: #1c2822;
+    --line: #283731;
+    --ink: #ece6da;
+    --muted: #9ea69b;
+
+    --pine: #78c7a2;
+    --pine-strong: #98d8ba;
+    --pine-soft: #193429;
+    --on-pine: #0b1410;
+
+    --berry: #ee8494;
+    --berry-soft: #3b1e25;
+    --on-berry: #1a0b0f;
+
+    --gold: #e0b562;
+    --gold-soft: #33291a;
+
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-pine: var(--pine);
+  --color-pine-strong: var(--pine-strong);
+  --color-pine-soft: var(--pine-soft);
+  --color-on-pine: var(--on-pine);
+  --color-berry: var(--berry);
+  --color-berry-soft: var(--berry-soft);
+  --color-on-berry: var(--on-berry);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+}
+
+@theme {
+  /* Avatar tones – readable with white initials in light and dark mode */
+  --color-tone-1: #2f6b52;
+  --color-tone-2: #a8394d;
+  --color-tone-3: #8f6414;
+  --color-tone-4: #6b4a7a;
+  --color-tone-5: #2f5d73;
+  --color-tone-6: #a5532f;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------- */
+
+@layer base {
+  body {
+    background-color: var(--paper);
+    /* subtle dotted paper texture */
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in oklab, var(--ink) 7%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--gold) 35%, transparent);
+  }
+
+  /* Keep the page from scrolling behind an open dialog */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components
+   ------------------------------------------------------------------------- */
+
+@layer components {
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.18em] text-berry uppercase;
+  }
+
+  .card {
+    @apply rounded-3xl border border-line bg-surface;
+    box-shadow:
+      0 1px 0 color-mix(in oklab, var(--ink) 4%, transparent),
+      0 18px 40px -28px color-mix(in oklab, var(--ink) 45%, transparent);
+  }
+
+  /* Bunting garland, used as a festive divider */
+  .garland {
+    height: 26px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cpath d='M0 3.5 Q48 9 96 3.5' fill='none' stroke='%23a59f92' stroke-width='1.2'/%3E%3Cpath d='M8 4.6 L24 6.2 L15 21 Z' fill='%232f6b52'/%3E%3Cpath d='M40 6.1 L56 6.1 L48 22 Z' fill='%23ab3247'/%3E%3Cpath d='M72 6.2 L88 4.6 L81 21 Z' fill='%23c08a2e'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center top;
+    mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  }
+
+  dialog.modal[open] {
+    animation: modal-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  dialog.modal::backdrop {
+    background: rgb(10 16 13 / 0.55);
+    backdrop-filter: blur(3px);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
