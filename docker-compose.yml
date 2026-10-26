@@ -3,7 +3,8 @@ services:
     build: .
     image: wichtel-app
     ports:
-      - "3000:3000"
+      # Reachable on port 3002 of the server; inside the container the app uses 3000
+      - "3002:3000"
     environment:
       - DATABASE_URL=file:/app/data/wichtel.db
       # Read from the shell or a .env file next to this compose file

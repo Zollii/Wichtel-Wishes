@@ -97,7 +97,8 @@ ADMIN_PASSWORD='something-long' docker compose up -d --build
 ```
 
 `ADMIN_PASSWORD` is required (it can also live in a `.env` file next to `docker-compose.yml`).
-The app listens on port 3000.
+The app is reachable on port 3002 (`http://<server>:3002`); change the left side of `ports` in
+`docker-compose.yml` to use another one.
 
 > **Docker inside WSL:** WSL shuts the Linux distro down shortly after the last WSL session
 > ends, which also stops Docker and this container (it starts again with the next `wsl` call,
