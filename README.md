@@ -102,10 +102,50 @@ The app listens on port 3000.
 > **Docker inside WSL:** WSL shuts the Linux distro down shortly after the last WSL session
 > ends, which also stops Docker and this container (it starts again with the next `wsl` call,
 > thanks to `restart: unless-stopped`). To keep the app reachable, keep a WSL session open or
-> run Docker somewhere that stays on. The SQLite database is stored in the `wichtel_data` volume at
-`/app/data/wichtel.db`. On every start the container runs `prisma migrate deploy`, which creates
-the database if it is missing and applies new migrations. `/api/health` checks that the
-database is reachable and is used as the container health check.
+> run Docker somewhere that stays on.
+
+The SQLite database is stored in the `wichtel_data` volume at `/app/data/wichtel.db`. On every
+start the container runs `prisma migrate deploy`, which creates the database if it is missing
+and applies new migrations. `/api/health` checks that the database is reachable and is used as
+the container health check.
+
+## Home server
+
+The server needs Git and Docker with Compose v2.
+
+**First time:**
+
+```bash
+git clone github-wichtel:Zollii/Wichtel-Wishes.git wichtel   # see "Repository access" below
+cd wichtel
+echo "ADMIN_PASSWORD='something-long'" > .env
+./update.sh
+```
+
+**Updating:** run `./update.sh` in that folder. It pulls the latest code (`git pull --ff-only`),
+rebuilds the image, restarts the container and waits until the health check passes. The
+database volume is kept; new migrations are applied on start. Run it as a user in the `docker`
+group – with `sudo`, Git would look for the repository key in root's home instead.
+
+**Repository access:** while the repository is private, the server reads it with a deploy key –
+read-only, limited to this repository and without expiry:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "wichtel server" -f ~/.ssh/wichtel_deploy
+cat ~/.ssh/wichtel_deploy.pub
+# GitHub: repository → Settings → Deploy keys → Add deploy key, paste the line,
+# leave "Allow write access" unchecked.
+cat >> ~/.ssh/config <<'EOF'
+Host github-wichtel
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/wichtel_deploy
+  IdentitiesOnly yes
+EOF
+```
+
+If the repository is public, clone `https://github.com/Zollii/Wichtel-Wishes.git` instead and
+skip the key.
 
 ## Taking over data from v2
 
@@ -133,4 +173,5 @@ lib/data.ts           read queries (server-only)
 lib/validation.ts     form input parsing
 proxy.ts              renews the sign-in cookie on every visit
 prisma/               schema, migrations and seed script
+update.sh             pulls the latest code and rebuilds the container on the server
 ```
